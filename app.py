@@ -12,13 +12,24 @@ st.image("https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.p
 st.markdown("""
     <style>
     .stApp {
-        background-color: #f2f2f2;
+        background-color: #f5f5f5;
     }
-    h1, h2, h3 {
+    h1 {
         color: #ff7300;
     }
-    .css-18e3th9 {
-        background-color: #ffffff;
+    h2, h3 {
+        color: #003865;
+    }
+    .stButton>button {
+        background-color: #ff7300;
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+    .stDownloadButton>button {
+        background-color: #003865;
+        color: white;
+        border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
