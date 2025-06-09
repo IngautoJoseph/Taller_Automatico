@@ -1,5 +1,4 @@
 streamlit
-firebase-admin
-google-cloud-firestore
-fpdf
+psycopg2-binary
 pandas
+fpdf
