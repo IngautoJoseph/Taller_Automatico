@@ -5,25 +5,22 @@ from email.message import EmailMessage
 import os
 import sqlite3
 
-# Mostrar logo desde URL (más grande)
+# Mostrar logo
 st.image("https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.png", width=400)
 
-# Estilos personalizados
+# Estilos
 st.markdown("""
     <style>
-    /* Fondo general */
     .stApp {
         background-color: #eeeeee;
     }
 
-    /* Fondo del contenido */
     .block-container {
         background-color: #ffffff;
         padding: 2rem;
         border-radius: 10px;
     }
 
-    /* Títulos */
     h1, h2, h3 {
         color: #ff7300 !important;
     }
@@ -33,7 +30,6 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
-    /* Botones */
     .stButton>button {
         background-color: #ff7300;
         color: white;
@@ -51,11 +47,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Título y enlace
+# Título
 st.title("Sistema de Citas - Ingauto Catamayo")
+
+# Enlace al webmail
 st.markdown("[📬 Accede a tu correo Ingauto aquí](https://www.ingauto.com.ec:2096/cpsess9732837900/3rdparty/roundcube/?_task=mail&_mbox=INBOX.Sent)")
 
-# Crear base de datos y tabla
+# Base de datos
 conn = sqlite3.connect("citas.db")
 cursor = conn.cursor()
 cursor.execute("""
@@ -81,7 +79,7 @@ cursor.execute("""
 """)
 conn.commit()
 
-# Función PDF
+# Funciones
 def generar_pdf(datos, nombre_archivo):
     pdf = FPDF()
     pdf.add_page()
@@ -90,7 +88,6 @@ def generar_pdf(datos, nombre_archivo):
         pdf.cell(200, 10, txt=f"{clave}: {valor}", ln=True)
     pdf.output(nombre_archivo)
 
-# Función email
 def enviar_pdf_por_correo(remitente, clave, destinatario, archivo, asunto):
     msg = EmailMessage()
     msg["Subject"] = asunto
@@ -117,7 +114,7 @@ with st.form("formulario_cita"):
     combustible = st.selectbox("Combustible", ["Gasolina", "Diésel"])
     motor = st.text_input("Motor")
     chasis = st.text_input("Chasis")
-    
+
     servicios_disponibles = [
         "Mantenimiento de 5000 km",
         "Mantenimiento de 10000 km",
@@ -133,22 +130,17 @@ with st.form("formulario_cita"):
         "Alineación y balanceo",
         "Otros"
     ]
-    
     servicio = st.selectbox("Servicio solicitado", servicios_disponibles)
 
-    servicio = st.selectbox("Servicio solicitado", servicios_disponibles)
-
-# Mostrar campo adicional solo si es "Otros"
-servicio_extra = ""
-if servicio == "Otros":
-    servicio_extra = st.text_area("📝 Descripción del servicio solicitado")
-
+    servicio_extra = ""
+    if servicio == "Otros":
+        servicio_extra = st.text_area("📝 Descripción del servicio solicitado")
 
     fecha = st.date_input("Fecha de cita")
     hora = st.time_input("Hora")
     enviar = st.form_submit_button("Registrar y generar PDF")
 
-# Guardar datos y generar PDF
+# Guardar datos y procesar
 if enviar:
     if not all([nombre, telefono, cedula, correo_cliente, marca, modelo, anio, placa]):
         st.warning("Por favor completa todos los campos obligatorios.")
@@ -172,7 +164,6 @@ if enviar:
             "Hora": str(hora),
         }
 
-        # Guardar en BD
         try:
             cursor.execute("""
                 INSERT INTO citas (nombre, telefono, cedula, correo, marca, modelo, anio, placa, kilometraje, combustible, motor, chasis, servicio, servicio_extra, fecha, hora)
@@ -185,7 +176,6 @@ if enviar:
         except Exception as e:
             st.error(f"Error al guardar en base de datos: {e}")
 
-        # Generar PDF
         nombre_pdf = f"cita_{placa}_{fecha}.pdf"
         ruta_pdf = os.path.join("/tmp", nombre_pdf)
         generar_pdf(datos, ruta_pdf)
@@ -194,17 +184,16 @@ if enviar:
         with open(ruta_pdf, "rb") as f:
             st.download_button("⬇️ Descargar PDF", data=f, file_name=nombre_pdf, mime="application/pdf")
 
-        # Enviar por correo
         try:
             remitente = "accesoriossd@ingauto.com.ec"
-            clave_app = "51TBdC375q"  # ⚠️ Reemplaza por tu clave real
+            clave_app = "51TBdC375q"  # ⚠️ Reemplazar por tu clave real
             enviar_pdf_por_correo(remitente, clave_app, correo_cliente, ruta_pdf, "Tu cita en Ingauto")
             enviar_pdf_por_correo(remitente, clave_app, "accesoriossd@ingauto.com.ec", ruta_pdf, "Nueva cita registrada")
             st.info("📧 PDF enviado correctamente a ambos correos.")
         except Exception as e:
             st.error(f"Error al enviar correo: {e}")
 
-# Mostrar citas guardadas
+# Ver citas guardadas
 st.subheader("📋 Citas registradas")
 if st.checkbox("Mostrar todas las citas registradas"):
     cursor.execute("SELECT * FROM citas ORDER BY id DESC")
