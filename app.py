@@ -5,17 +5,17 @@ from email.message import EmailMessage
 import os
 import sqlite3
 
-# Mostrar logo desde URL
-st.image("https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.png", width=300)
+# Mostrar logo desde URL (más grande)
+st.image("https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.png", width=400)
 
-# Estilos CSS
+# Estilos personalizados
 st.markdown("""
     <style>
     .stApp {
-        background-color: #fdfdfd;
+        background-color: #f2f2f2;
     }
     h1, h2, h3 {
-        color: #FF7A00;
+        color: #ff7300;
     }
     .css-18e3th9 {
         background-color: #ffffff;
@@ -46,6 +46,7 @@ cursor.execute("""
         motor TEXT,
         chasis TEXT,
         servicio TEXT,
+        servicio_extra TEXT,
         fecha TEXT,
         hora TEXT
     )
@@ -54,7 +55,6 @@ conn.commit()
 
 # Función PDF
 def generar_pdf(datos, nombre_archivo):
-    from fpdf import FPDF
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
@@ -89,18 +89,29 @@ with st.form("formulario_cita"):
     combustible = st.selectbox("Combustible", ["Gasolina", "Diésel"])
     motor = st.text_input("Motor")
     chasis = st.text_input("Chasis")
-    servicio = st.selectbox(
-        "Servicio solicitado", [
-            "Mantenimiento de 5000 km",
-            "Mantenimiento de 10000 km",
-            "Mantenimiento de 15000 km",
-            "Cambio de aceite",
-            "Revisión de frenos",
-            "Diagnóstico general",
-            "Alineación y balanceo",
-            "Otros"
-        ]
-    )
+    
+    servicios_disponibles = [
+        "Mantenimiento de 5000 km",
+        "Mantenimiento de 10000 km",
+        "Mantenimiento de 15000 km",
+        "Mantenimiento de 20000 km",
+        "Mantenimiento de 25000 km",
+        "Mantenimiento de 30000 km",
+        "Mantenimiento de 40000 km",
+        "Mantenimiento de 50000 km",
+        "Cambio de aceite",
+        "Revisión de frenos",
+        "Diagnóstico general",
+        "Alineación y balanceo",
+        "Otros"
+    ]
+    
+    servicio = st.selectbox("Servicio solicitado", servicios_disponibles)
+
+    servicio_extra = ""
+    if servicio == "Otros":
+        servicio_extra = st.text_area("📝 Describe el servicio solicitado:")
+
     fecha = st.date_input("Fecha de cita")
     hora = st.time_input("Hora")
     enviar = st.form_submit_button("Registrar y generar PDF")
@@ -124,6 +135,7 @@ if enviar:
             "Motor": motor,
             "Chasis": chasis,
             "Servicio solicitado": servicio,
+            "Detalle adicional": servicio_extra if servicio == "Otros" else "",
             "Fecha de cita": str(fecha),
             "Hora": str(hora),
         }
@@ -131,11 +143,11 @@ if enviar:
         # Guardar en BD
         try:
             cursor.execute("""
-                INSERT INTO citas (nombre, telefono, cedula, correo, marca, modelo, anio, placa, kilometraje, combustible, motor, chasis, servicio, fecha, hora)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO citas (nombre, telefono, cedula, correo, marca, modelo, anio, placa, kilometraje, combustible, motor, chasis, servicio, servicio_extra, fecha, hora)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 nombre, telefono, cedula, correo_cliente, marca, modelo, anio, placa,
-                kilometraje, combustible, motor, chasis, servicio, str(fecha), str(hora)
+                kilometraje, combustible, motor, chasis, servicio, servicio_extra, str(fecha), str(hora)
             ))
             conn.commit()
         except Exception as e:
@@ -179,7 +191,8 @@ if st.checkbox("Mostrar todas las citas registradas"):
         **Motor:** {fila[11]}  
         **Chasis:** {fila[12]}  
         **Servicio:** {fila[13]}  
-        **Fecha:** {fila[14]}  
-        **Hora:** {fila[15]}  
+        **Detalle adicional:** {fila[14]}  
+        **Fecha:** {fila[15]}  
+        **Hora:** {fila[16]}  
         ---
         """)
