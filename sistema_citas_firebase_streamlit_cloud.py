@@ -54,10 +54,8 @@ st.title("Sistema de Citas - Firebase")
 
 # Inicializar Firebase con clave leída desde secrets
 if not firebase_admin._apps:
-    firebase_json = st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
-    firebase_dict = json.loads(firebase_json)
-    cred = credentials.Certificate(firebase_dict)
-    firebase_admin.initialize_app(cred)
+    cred = credentials.Certificate(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
+
 
 db = firestore.client()
 
