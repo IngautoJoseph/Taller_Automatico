@@ -11,9 +11,16 @@ st.image("https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.p
 # Estilos personalizados
 st.markdown("""
     <style>
-    /* Fondo general de la app */
+    /* Fondo general */
     .stApp {
-        background-color: #f5f5f5;
+        background-color: #eeeeee;
+    }
+
+    /* Fondo del contenido */
+    .block-container {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 10px;
     }
 
     /* Títulos */
@@ -21,40 +28,25 @@ st.markdown("""
         color: #ff7300 !important;
     }
 
-    /* Botón de envío */
+    label {
+        color: #003865 !important;
+        font-weight: 600 !important;
+    }
+
+    /* Botones */
     .stButton>button {
         background-color: #ff7300;
         color: white;
         font-weight: bold;
-        border-radius: 8px;
-        padding: 0.5em 1.5em;
+        border-radius: 6px;
+        padding: 0.4rem 1.2rem;
     }
 
-    /* Botón de descarga */
     .stDownloadButton>button {
         background-color: #003865;
         color: white;
         font-weight: bold;
-        border-radius: 8px;
-    }
-
-    /* Quitar fondo blanco de los formularios */
-    .block-container {
-        background-color: #f5f5f5 !important;
-    }
-
-    /* Campos de entrada */
-    input, textarea, select {
-        background-color: white !important;
-        color: black !important;
-        border: 1px solid #ccc !important;
-        border-radius: 6px !important;
-        padding: 8px !important;
-    }
-
-    label {
-        font-weight: bold !important;
-        color: #003865 !important;
+        border-radius: 6px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -144,9 +136,13 @@ with st.form("formulario_cita"):
     
     servicio = st.selectbox("Servicio solicitado", servicios_disponibles)
 
-    servicio_extra = ""
-    if servicio == "Otros":
-        servicio_extra = st.text_area("📝 Describe el servicio solicitado:")
+    servicio = st.selectbox("Servicio solicitado", servicios_disponibles)
+
+# Mostrar campo adicional solo si es "Otros"
+servicio_extra = ""
+if servicio == "Otros":
+    servicio_extra = st.text_area("📝 Descripción del servicio solicitado")
+)
 
     fecha = st.date_input("Fecha de cita")
     hora = st.time_input("Hora")
