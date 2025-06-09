@@ -6,7 +6,8 @@ import os
 import sqlite3
 
 # Mostrar logo
-st.image("https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.png", width=400)
+direccion_logo = "https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.png"
+st.image(direccion_logo, width=400)
 
 # Estilos
 st.markdown("""
@@ -49,43 +50,33 @@ st.markdown("""
 
 # Título
 st.title("Sistema de Citas - Ingauto Catamayo")
-
-# Enlace al webmail
-st.markdown("[📬 Accede a tu correo Ingauto aquí](https://www.ingauto.com.ec:2096/cpsess9732837900/3rdparty/roundcube/?_task=mail&_mbox=INBOX.Sent)")
-
-# Base de datos
-conn = sqlite3.connect("citas.db")
-cursor = conn.cursor()
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS citas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT,
-        telefono TEXT,
-        cedula TEXT,
-        correo TEXT,
-        marca TEXT,
-        modelo TEXT,
-        anio TEXT,
-        placa TEXT,
-        kilometraje TEXT,
-        combustible TEXT,
-        motor TEXT,
-        chasis TEXT,
-        servicio TEXT,
-        servicio_extra TEXT,
-        fecha TEXT,
-        hora TEXT
-    )
-""")
-conn.commit()
+st.markdown("[\ud83d\udcec Accede a tu correo Ingauto aquí](https://www.ingauto.com.ec:2096/cpsess9732837900/3rdparty/roundcube/?_task=mail&_mbox=INBOX.Sent)")
 
 # Funciones
 def generar_pdf(datos, nombre_archivo):
     pdf = FPDF()
     pdf.add_page()
+    pdf.set_font("Arial", size=14)
+    pdf.image(direccion_logo, x=10, y=8, w=50)
+    pdf.ln(30)
+    pdf.cell(200, 10, txt="Cita Registrada - Ingauto Catamayo", ln=True, align="C")
+    pdf.ln(10)
+
+    # Encabezado de tabla
+    pdf.set_fill_color(255, 115, 0)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(60, 10, "Campo", 1, 0, 'C', fill=True)
+    pdf.cell(130, 10, "Valor", 1, 1, 'C', fill=True)
+
+    # Contenido
+    pdf.set_text_color(0, 0, 0)
     pdf.set_font("Arial", size=12)
     for clave, valor in datos.items():
-        pdf.cell(200, 10, txt=f"{clave}: {valor}", ln=True)
+        pdf.cell(60, 10, clave, 1)
+        pdf.cell(130, 10, str(valor), 1)
+        pdf.ln()
+
     pdf.output(nombre_archivo)
 
 def enviar_pdf_por_correo(remitente, clave, destinatario, archivo, asunto):
@@ -115,32 +106,22 @@ with st.form("formulario_cita"):
     motor = st.text_input("Motor")
     chasis = st.text_input("Chasis")
 
-    servicios_disponibles = [
-        "Mantenimiento de 5000 km",
-        "Mantenimiento de 10000 km",
-        "Mantenimiento de 15000 km",
-        "Mantenimiento de 20000 km",
-        "Mantenimiento de 25000 km",
-        "Mantenimiento de 30000 km",
-        "Mantenimiento de 40000 km",
-        "Mantenimiento de 50000 km",
-        "Cambio de aceite",
-        "Revisión de frenos",
-        "Diagnóstico general",
-        "Alineación y balanceo",
-        "Otros"
-    ]
-    servicio = st.selectbox("Servicio solicitado", servicios_disponibles)
-
-    servicio_extra = ""
-    if servicio == "Otros":
-        servicio_extra = st.text_area("📝 Descripción del servicio solicitado")
+    servicio = st.selectbox("Servicio solicitado", [
+        "Mantenimiento de 5000 km", "Mantenimiento de 10000 km",
+        "Mantenimiento de 15000 km", "Mantenimiento de 20000 km",
+        "Mantenimiento de 25000 km", "Mantenimiento de 30000 km",
+        "Mantenimiento de 40000 km", "Mantenimiento de 50000 km",
+        "Cambio de aceite", "Revisión de frenos", "Diagnóstico general",
+        "Alineación y balanceo", "Otros"
+    ])
+    servicio_extra = st.text_area("📝 Descripción del servicio solicitado (si aplica)")
 
     fecha = st.date_input("Fecha de cita")
     hora = st.time_input("Hora")
     enviar = st.form_submit_button("Registrar y generar PDF")
 
-# Guardar datos y procesar
+# Procesar datos
+datos = {}
 if enviar:
     if not all([nombre, telefono, cedula, correo_cliente, marca, modelo, anio, placa]):
         st.warning("Por favor completa todos los campos obligatorios.")
@@ -159,22 +140,10 @@ if enviar:
             "Motor": motor,
             "Chasis": chasis,
             "Servicio solicitado": servicio,
-            "Detalle adicional": servicio_extra if servicio == "Otros" else "",
+            "Detalle adicional": servicio_extra,
             "Fecha de cita": str(fecha),
             "Hora": str(hora),
         }
-
-        try:
-            cursor.execute("""
-                INSERT INTO citas (nombre, telefono, cedula, correo, marca, modelo, anio, placa, kilometraje, combustible, motor, chasis, servicio, servicio_extra, fecha, hora)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                nombre, telefono, cedula, correo_cliente, marca, modelo, anio, placa,
-                kilometraje, combustible, motor, chasis, servicio, servicio_extra, str(fecha), str(hora)
-            ))
-            conn.commit()
-        except Exception as e:
-            st.error(f"Error al guardar en base de datos: {e}")
 
         nombre_pdf = f"cita_{placa}_{fecha}.pdf"
         ruta_pdf = os.path.join("/tmp", nombre_pdf)
@@ -186,34 +155,46 @@ if enviar:
 
         try:
             remitente = "accesoriossd@ingauto.com.ec"
-            clave_app = "51TBdC375q"  # ⚠️ Reemplazar por tu clave real
+            clave_app = "51TBdC375q"  # ⚠️ Reemplazar por la clave real
             enviar_pdf_por_correo(remitente, clave_app, correo_cliente, ruta_pdf, "Tu cita en Ingauto")
             enviar_pdf_por_correo(remitente, clave_app, "accesoriossd@ingauto.com.ec", ruta_pdf, "Nueva cita registrada")
             st.info("📧 PDF enviado correctamente a ambos correos.")
         except Exception as e:
             st.error(f"Error al enviar correo: {e}")
 
-# Ver citas guardadas
-st.subheader("📋 Citas registradas")
-if st.checkbox("Mostrar todas las citas registradas"):
-    cursor.execute("SELECT * FROM citas ORDER BY id DESC")
-    filas = cursor.fetchall()
-    for fila in filas:
-        st.markdown(f"""
-        **ID:** {fila[0]}  
-        **Nombre:** {fila[1]}  
-        **Teléfono:** {fila[2]}  
-        **Cédula:** {fila[3]}  
-        **Correo:** {fila[4]}  
-        **Vehículo:** {fila[5]} {fila[6]} ({fila[7]})  
-        **Placa:** {fila[8]}  
-        **Kilometraje:** {fila[9]}  
-        **Combustible:** {fila[10]}  
-        **Motor:** {fila[11]}  
-        **Chasis:** {fila[12]}  
-        **Servicio:** {fila[13]}  
-        **Detalle adicional:** {fila[14]}  
-        **Fecha:** {fila[15]}  
-        **Hora:** {fila[16]}  
-        ---
-        """)
+# Mostrar registros
+def mostrar_registros():
+    conn = sqlite3.connect("citas.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS citas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT, telefono TEXT, cedula TEXT, correo TEXT,
+            marca TEXT, modelo TEXT, anio TEXT, placa TEXT, kilometraje TEXT,
+            combustible TEXT, motor TEXT, chasis TEXT,
+            servicio TEXT, servicio_extra TEXT, fecha TEXT, hora TEXT
+        )
+    """)
+    conn.commit()
+
+    if datos:
+        cursor.execute("""
+            INSERT INTO citas (nombre, telefono, cedula, correo, marca, modelo, anio, placa,
+            kilometraje, combustible, motor, chasis, servicio, servicio_extra, fecha, hora)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, tuple(datos.values()))
+        conn.commit()
+
+    st.subheader("📋 Citas registradas")
+    if st.checkbox("Mostrar tabla de registros"):
+        cursor.execute("SELECT * FROM citas ORDER BY id DESC")
+        filas = cursor.fetchall()
+        if filas:
+            import pandas as pd
+            columnas = ["ID", "Nombre", "Teléfono", "Cédula", "Correo", "Marca", "Modelo", "Año",
+                        "Placa", "Kilometraje", "Combustible", "Motor", "Chasis",
+                        "Servicio", "Descripción", "Fecha", "Hora"]
+            df = pd.DataFrame(filas, columns=columnas)
+            st.dataframe(df)
+
+mostrar_registros()
