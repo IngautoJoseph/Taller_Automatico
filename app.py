@@ -11,25 +11,50 @@ st.image("https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.p
 # Estilos personalizados
 st.markdown("""
     <style>
+    /* Fondo general de la app */
     .stApp {
         background-color: #f5f5f5;
     }
-    h1 {
-        color: #ff7300;
+
+    /* Títulos */
+    h1, h2, h3 {
+        color: #ff7300 !important;
     }
-    h2, h3 {
-        color: #003865;
-    }
+
+    /* Botón de envío */
     .stButton>button {
         background-color: #ff7300;
         color: white;
-        border-radius: 8px;
         font-weight: bold;
+        border-radius: 8px;
+        padding: 0.5em 1.5em;
     }
+
+    /* Botón de descarga */
     .stDownloadButton>button {
         background-color: #003865;
         color: white;
+        font-weight: bold;
         border-radius: 8px;
+    }
+
+    /* Quitar fondo blanco de los formularios */
+    .block-container {
+        background-color: #f5f5f5 !important;
+    }
+
+    /* Campos de entrada */
+    input, textarea, select {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid #ccc !important;
+        border-radius: 6px !important;
+        padding: 8px !important;
+    }
+
+    label {
+        font-weight: bold !important;
+        color: #003865 !important;
     }
     </style>
 """, unsafe_allow_html=True)
