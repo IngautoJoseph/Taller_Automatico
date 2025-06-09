@@ -142,7 +142,7 @@ with st.form("formulario_cita"):
 servicio_extra = ""
 if servicio == "Otros":
     servicio_extra = st.text_area("📝 Descripción del servicio solicitado")
-)
+
 
     fecha = st.date_input("Fecha de cita")
     hora = st.time_input("Hora")
