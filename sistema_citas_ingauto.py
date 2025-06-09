@@ -50,7 +50,8 @@ st.markdown("""
 
 # Título
 st.title("Sistema de Citas - Ingauto Catamayo")
-st.markdown("[\ud83d\udcec Accede a tu correo Ingauto aquí](https://www.ingauto.com.ec:2096/cpsess9732837900/3rdparty/roundcube/?_task=mail&_mbox=INBOX.Sent)")
+st.markdown("[&#128236; Accede a tu correo Ingauto aquí](https://www.ingauto.com.ec:2096/cpsess9732837900/3rdparty/roundcube/?_task=mail&_mbox=INBOX.Sent)")
+
 
 # Funciones
 def generar_pdf(datos, nombre_archivo):
