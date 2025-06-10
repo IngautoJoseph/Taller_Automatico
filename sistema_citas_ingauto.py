@@ -221,7 +221,8 @@ with st.form("formulario"):
             generar_pdf(datos, archivo_pdf)
             guardar_cita(datos, editar, st.session_state.editar_id)
             enviar_correo_pdf(correo, archivo_pdf)
-            st.success("✅ Cita registrada y correo enviado")            st.session_state.editar_id = None
+            st.success("✅ Cita registrada y correo enviado")            
+            st.session_state.editar_id = None
 
 # --- TABLA ---
 st.subheader("📑 Citas registradas")
