@@ -16,7 +16,7 @@ from openpyxl.styles import Font, Alignment, PatternFill
 # ====================== CONFIGURACIÓN ======================
 LOGO_URL = "https://www.ingauto.com.ec/wp-content/uploads/2019/06/logo-Ingauto-T.png"
 CORREO_ADMIN = "accesoriossd@ingauto.com.ec"
-PASS_CORREO = "51TBdC375q"
+PASS_CORREO = "Joseph2002*jm"
 SMTP_SERVER = "mail.ingauto.com.ec"
 SMTP_PORT = 465
 
